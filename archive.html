@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>postcardarchive</title>
+    <link rel="stylesheet" href="./resources/index.css"> <!--this links your HTML file to your CSS style sheet in resources folder-->
+    <link rel="icon" type="image/x-icon" href="./resources/"> <!--In href="" after resources, type in your file name to link an image for your favicon-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+<!--If you want to have a header with a graphic 'logo' you make for your archive, a link or menu to navigate to other page(s)-->
+<header>
+   <nav>
+    <ul>
+        <li><a href="index.html" target=_self> <img src="resources\shoebox_logo.png" width="25" height="25"> </a> </li>
+        <li><a href="archive.html" target=_self>Archive</a></li>
+        <li><a href="https://trysincere.com/blog/wp-content/uploads/2013/08/puppy.jpg" target=_blank> submit </a></li>
+        <li><a href="https://www.mapcrunch.com/" target=_blank>about</a></li>
+    </ul>
+    </nav>
+</header>
+
+<div class="grid">
+    <div>
+        <img src="1000_F_219394195_GyZ88jiVm7albjvcefqcaUIFhyXWMCDT.jpg">
+    </div>
+
+</div>
+
+<script>
+    var SPREADSHEET_ID = ""; //<-- put spreadsheet ID from URL here
+    var TAB_NAME = "Sheet1"; // Make sure it has the correct sheet name from bottom of webpage
+
+
+$(document).ready(function () {
+  $.getJSON("https://opensheet.elk.sh/" + SPREADSHEET_ID + "/" + TAB_NAME, function (data) {
+    
+    console.log(data); 
+    
+  
+    data.forEach(function (entry, index) {
+      
+      console.log(entry);
+      //replace header1, header2, etc. with the column names from your google sheet
+      $(`<section> 
+            <p>` + entry.header1 + `</p>
+            <p>` + entry.header2 + `</p>
+            <p>` + entry.header3 + `</p>
+            <p>` + entry.header4 + `</p>
+            <p>` + entry.header5 + `</p>
+            <p>` + entry.header6 + `</p>
+         </section>`)
+        .appendTo(".grid");
+    });
+  });  
+});
+</script>
+
+<!--This code was provided in Avrie Allen's Wintersession course at RISD, Activating Networks, Gathering Knowledge and was initially inspired by Chia Amisola's sheet sites tutorial with Developh-->
+</body>
+</html>

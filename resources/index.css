@@ -1,0 +1,72 @@
+/*  The * below is used as a universal selector, so it creates default settings for your site */
+* {
+    font-size: 12pt;
+    line-height: 14pt;
+    font-family: Arial, Helvetica, sans-serif;
+}
+menu{color:mediumvioletred;font-size: 22;}
+
+body {
+  background-color:rgb(1, 110, 34);
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #000000;
+  display:flex;
+}
+
+ul li {
+  float: center;
+  display:flex;
+  
+}
+
+ul li a {
+  display: flex;
+  color: rgb(251, 236, 236);
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  border: 2px solid rgb(179, 212, 12);
+  z-index: 300;
+}
+
+ul li a:hover {
+  color: #ffd50088;
+}
+/* font-face is used to use your own custom, non-systems fonts. place file in resources folder, same has this index.css file*/
+@font-face {
+    font-family: "";
+    src: url(./);
+}
+
+
+
+img {
+  display: block;
+  margin: auto;
+    margin-top: 25px;
+}
+/* how you want the structure of your submissions to appear below. display: grid; and display: flex; are good places to start */
+.grid {
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    background-color: rgb(255, 150, 30);
+    margin: auto;
+}
+
+/* how do you want each individual submission to appear? do they have a border: 1px black solid; etc. a different font-family, font-size or color? */
+.grid div {
+  background-color: #f1f1f1;
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 30px;
+  text-align: center;
+}
+
+/* some other things you should consider for css styling are: 
+html, <h1>, <p>, <div>, .classes, #IDs, img, a */
