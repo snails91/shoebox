@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <p>postcardarchive</p>
+    <link rel="stylesheet" href="./resources/index.css"> <!--this links your HTML file to your CSS style sheet in resources folder-->
+    <link rel="icon" type="image/x-icon" href="./resources/"> <!--In href="" after resources, type in your file name to link an image for your favicon-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+<!--If you want to have a header with a graphic 'logo' you make for your archive, a link or menu to navigate to other page(s)-->
+<header>
+    <div >
+            <a href="index.html" target=_self><h2>postcard archive</h2></a>
+
+    </div>
+    
+     <hr style="border: 1px solid rgb(0, 0, 0); width: 70%;">
+
+   <nav>
+    <ul>
+        <li><a href="archive.html" target=_self>view the archive</a></li>
+        <li><a href="submit.html" target=_blank> add a postcard </a></li>
+        <li><a href="about.html" target=_self>about the archive</a></li>
+    </ul>
+    </nav>
+     <hr style="border: 1px solid rgb(0, 0, 0); width: 70%;">
+</header>
+
+<div>
+    <div class="container">
+  <div>Welcome!</div>
+  <div>My name is Sasha. This public digital archive. This archive explores how making a process more difficult, in this case documenting a photo, can add lost value back into our lives. In a society that pushes us to prioritize effortlessness over morals, I theorize that moments of friction are what keeps us grounded. </div>
+  <div>Thanks for visiting! </div>
+<div>
+   <p>friction friction friction friction <span>friction</span>friction <span>friction friction </span>friction friction friction </p> 
+</div>
+
+</div>
+
+<script>
+    var SPREADSHEET_ID = ""; //<-- put spreadsheet ID from URL here
+    var TAB_NAME = "Sheet1"; // Make sure it has the correct sheet name from bottom of webpage
+
+
+$(document).ready(function () {
+  $.getJSON("https://opensheet.elk.sh/" + SPREADSHEET_ID + "/" + TAB_NAME, function (data) {
+    
+    console.log(data); 
+    
+  
+    data.forEach(function (entry, index) {
+      
+      console.log(entry);
+      //replace header1, header2, etc. with the column names from your google sheet
+      $(`<section> 
+            <p>` + entry.header1 + `</p>
+            <p>` + entry.header2 + `</p>
+            <p>` + entry.header3 + `</p>
+            <p>` + entry.header4 + `</p>
+            <p>` + entry.header5 + `</p>
+            <p>` + entry.header6 + `</p>
+         </section>`)
+        .appendTo(".grid");
+    });
+  });  
+});
+</script>
+
+<!--This code was provided in Avrie Allen's Wintersession course at RISD, Activating Networks, Gathering Knowledge and was initially inspired by Chia Amisola's sheet sites tutorial with Developh-->
+</body>
+</html>

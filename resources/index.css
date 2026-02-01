@@ -4,18 +4,30 @@
     line-height: 14pt;
     font-family: Arial, Helvetica, sans-serif;
 }
-menu{color:mediumvioletred;font-size: 22;}
+menu{font-size: 22;}
+
+@font-face {
+  font-family: "";
+  src: url(./);
+}
+
 
 body {
   background-color:rgb(1, 110, 34);
 }
+
+header a{
+  text-decoration: none;
+}
+
+/*ul settings for nav bar*/
 
 ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #000000;
+
   display:flex;
 }
 
@@ -27,24 +39,89 @@ ul li {
 
 ul li a {
   display: flex;
-  color: rgb(251, 236, 236);
+  color: rgb(0, 0, 0);
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
-  border: 2px solid rgb(179, 212, 12);
   z-index: 300;
 }
 
 ul li a:hover {
-  color: #ffd50088;
+  font-weight: bold;
 }
-/* font-face is used to use your own custom, non-systems fonts. place file in resources folder, same has this index.css file*/
-@font-face {
-    font-family: "";
-    src: url(./);
+
+h1{
+  align-content: center;
+}
+
+span{
+  writing-mode: vertical-lr;
+}
+
+bordered{
+  border-style: dashed;
+  margin: 25px;
+}
+
+/*h2*/
+
+h2{
+  text-transform: lowercase;
+  text-align: center;
+  text-decoration: none;
+  color:rgb(1, 110, 34);
+
+   font-size: 72px;
+            text-shadow: 
+                -1px -1px 0 black,
+                 1px -1px 0 black,
+                -1px  1px 0 black,
+                 1px  1px 0 black;
 }
 
 
+h2:hover,
+a:hover h2{
+  color: black;
+}
+
+form{
+  align-content: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  border-style: double;
+}
+
+.container div {
+  margin: 10px;
+  padding: 20px;
+  font-size: 30px;
+}
+
+postcard {
+display: block;
+}
+
+.oval {
+  height: 50px;
+  width: 100px;
+  background-color: #555;
+  border-radius: 50%;
+}
+
+img {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  width: 150px;
+}
+
+nav{
+align-items: center;
+}
 
 img {
   display: block;
@@ -55,8 +132,9 @@ img {
 .grid {
     display:grid;
     grid-template-columns: repeat(3,1fr);
-    background-color: rgb(255, 150, 30);
     margin: auto;
+    gap: 20px;
+    padding: 20px;
 }
 
 /* how do you want each individual submission to appear? do they have a border: 1px black solid; etc. a different font-family, font-size or color? */
@@ -66,6 +144,36 @@ img {
   padding: 10px;
   font-size: 30px;
   text-align: center;
+}
+
+/* Styling for postcard entries */
+.grid section.postcard-entry {
+  background-color: #f1f1f1;
+  border: 1px solid black;
+  padding: 15px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.grid section.postcard-entry img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.grid section.postcard-entry .postcard-text {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.grid section.postcard-entry .postcard-timestamp {
+  font-size: 10px;
+  color: #666;
+  margin: 0;
+  font-style: italic;
 }
 
 /* some other things you should consider for css styling are: 

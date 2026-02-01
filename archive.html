@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>postcardarchive</title>
+
     <link rel="stylesheet" href="./resources/index.css"> <!--this links your HTML file to your CSS style sheet in resources folder-->
     <link rel="icon" type="image/x-icon" href="./resources/"> <!--In href="" after resources, type in your file name to link an image for your favicon-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -13,51 +13,107 @@
 <body>
 <!--If you want to have a header with a graphic 'logo' you make for your archive, a link or menu to navigate to other page(s)-->
 <header>
-   <nav>
-    <ul>
-        <li><a href="index.html" target=_self> <img src="resources\shoebox_logo.png" width="25" height="25"> </a> </li>
-        <li><a href="archive.html" target=_self>Archive</a></li>
-        <li><a href="https://trysincere.com/blog/wp-content/uploads/2013/08/puppy.jpg" target=_blank> submit </a></li>
-        <li><a href="https://www.mapcrunch.com/" target=_blank>about</a></li>
-    </ul>
-    </nav>
-</header>
+    <div >
+            <a href="index.html" target=_self><h2>postcard archive</a></h2>
 
-<div class="grid">
-    <div>
-        <img src="1000_F_219394195_GyZ88jiVm7albjvcefqcaUIFhyXWMCDT.jpg">
     </div>
 
-</div>
+   <nav>
+    <ul>
+        <li><a href="archive.html" target=_self>view the archive</a></li>
+        <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSc5Uo75HvYyaBGhQdpnjtVgPwArm-zECGfoFipMOvzD20ZIMA/viewform?usp=sharing&ouid=109537610893738596858" target=_blank> add a postcard </a></li>
+        <li><a href="about.html" target=_self>about the archive</a></li>
+    </ul>
+    </nav>
+     <hr style="border: 1px solid rgb(0, 0, 0); width: 70%;">
+</header>
+
+
+   <div class="grid"></div>
+
+
+<!-- ****************************************************************************
+Below is javascript for connecting your google sheet to autopopulate the HTML-->
 
 <script>
-    var SPREADSHEET_ID = ""; //<-- put spreadsheet ID from URL here
-    var TAB_NAME = "Sheet1"; // Make sure it has the correct sheet name from bottom of webpage
 
+const SPREADSHEET_ID = "1oMMwpsWJyK6dAZJeTZt9ctn8hmfiPx1OG7S702VKOyQ"; 
+const TAB_NAME = "Sheet1"; //check case
 
-$(document).ready(function () {
-  $.getJSON("https://opensheet.elk.sh/" + SPREADSHEET_ID + "/" + TAB_NAME, function (data) {
+// get the
+function convertDriveImageUrl(driveUrl) {
+    if (!driveUrl || driveUrl.trim() === '') return '';
     
-    console.log(data); 
+    // If it's already a direct image URL, return as is
+    if (driveUrl.includes('drive.google.com/file/d/')) {
+        // Extract file ID from Google Drive URL
+        const fileIdMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (fileIdMatch) {
+            // Convert to direct image URL (thumbnail or full size)
+            return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
+        }
+    }
     
-  
-    data.forEach(function (entry, index) {
-      
-      console.log(entry);
-      //replace header1, header2, etc. with the column names from your google sheet
-      $(`<section> 
-            <p>` + entry.header1 + `</p>
-            <p>` + entry.header2 + `</p>
-            <p>` + entry.header3 + `</p>
-            <p>` + entry.header4 + `</p>
-            <p>` + entry.header5 + `</p>
-            <p>` + entry.header6 + `</p>
-         </section>`)
-        .appendTo(".grid");
-    });
-  });  
-});
+    // If it's already a direct image URL or other format, return as is
+    return driveUrl;
+}
+
+const url = `https://opensheet.elk.sh/${SPREADSHEET_ID}/${TAB_NAME}`;
+
+if (!SPREADSHEET_ID) {
+    console.error("Please add your SPREADSHEET_ID in the script section");
+    document.querySelector(".grid").innerHTML = "<p style='text-align:center; padding:20px;'>Please configure your spreadsheet ID in the code.</p>";
+} else {
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response failed");
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Loaded data:", data);
+
+            const grid = document.querySelector(".grid");
+            
+            if (!data || data.length === 0) {
+                grid.innerHTML = "<p style='text-align:center; padding:20px;'>No submissions yet. Be the first to add a postcard!</p>";
+                return;
+            }
+
+            // Get column headers to access columns by position
+            // Columns: A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7
+            const columnKeys = Object.keys(data[0] || {});
+            const columnD = columnKeys[3]; // Column D (4th column, index 3)
+            const columnE = columnKeys[4]; // Column E (5th column, index 4)
+            const columnF = columnKeys[5]; // Column F (6th column, index 5)
+            const columnH = columnKeys[7]; // Column H (8th column, index 7)
+
+            data.forEach((entry, index) => {
+                // Get values from columns D, E, F, and H (all text columns)
+                const valueD = entry[columnD] || "";
+                const valueE = entry[columnE] || "";
+                const valueF = entry[columnF] || "";
+                const valueH = entry[columnH] || "";
+                
+                const section = document.createElement("section");
+                section.className = "postcard-entry";
+                section.innerHTML = `
+                    ${valueD ? `<p class="postcard-text">${valueD}</p>` : ''}
+                    ${valueE ? `<p class="postcard-text">${valueE}</p>` : ''}
+                    ${valueF ? `<p class="postcard-text">${valueF}</p>` : ''}
+                    ${valueH ? `<p class="postcard-text">${valueH}</p>` : ''}
+                `;
+                grid.appendChild(section);
+            });
+        })
+        .catch(error => {
+            console.error("Sheet failed to load:", error);
+            document.querySelector(".grid").innerHTML = "<p style='text-align:center; padding:20px;'>Error loading archive. Please check your spreadsheet ID and make sure the sheet is publicly viewable.</p>";
+        });
+}
 </script>
+
 
 <!--This code was provided in Avrie Allen's Wintersession course at RISD, Activating Networks, Gathering Knowledge and was initially inspired by Chia Amisola's sheet sites tutorial with Developh-->
 </body>
