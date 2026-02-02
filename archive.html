@@ -11,25 +11,52 @@
 </head>
 
 <body>
+<!-- Decorative scrolling lines on left and right -->
+<div class="side-decoration side-left" aria-hidden="true"></div>
+<div class="side-decoration side-right" aria-hidden="true"></div>
+
+<div class="main-content">
 <!--If you want to have a header with a graphic 'logo' you make for your archive, a link or menu to navigate to other page(s)-->
 <header>
-    <div >
-            <a href="index.html" target=_self><h2>postcard archive</a></h2>
-
+    <div class="header-title">
+            <div class="oval"></div>
+            <a href="index.html" target=_self><h2>postcard archive</h2></a>
     </div>
+    
+     <hr style="border: 1px solid rgb(0, 0, 0); width: 70%;">
 
    <nav>
     <ul>
-        <li><a href="archive.html" target=_self>view the archive</a></li>
-        <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSc5Uo75HvYyaBGhQdpnjtVgPwArm-zECGfoFipMOvzD20ZIMA/viewform?usp=sharing&ouid=109537610893738596858" target=_blank> add a postcard </a></li>
-        <li><a href="about.html" target=_self>about the archive</a></li>
+        <li><a href="archive.html" target=_self> ➺ view the archive</a></li>
+        <li><a href="submit.html" target=_self> ✑ add a postcard </a></li>
+        <li><a href="about.html" target=_self> ➳ about the archive</a></li>
     </ul>
     </nav>
      <hr style="border: 1px solid rgb(0, 0, 0); width: 70%;">
 </header>
 
+   <div class="archive-scroll">
+       <div class="grid" id="postcard-grid"></div>
+   </div>
 
-   <div class="grid"></div>
+   <button type="button" class="archive-dingbat" id="questions-dingbat" aria-label="Show submission questions">
+       ✦
+   </button>
+
+   <div class="questions-postcard-overlay" id="questions-overlay" aria-hidden="true">
+       <div class="questions-postcard" id="questions-postcard">
+           <button type="button" class="questions-postcard-close" aria-label="Close">×</button>
+           <h3 class="questions-postcard-title">Questions on each postcard</h3>
+           <ul class="questions-postcard-list">
+               <li>Column D — your first question prompt</li>
+               <li>Column E — your second question prompt</li>
+               <li>Column F — your third question prompt</li>
+               <li>Column G — image (upload)</li>
+               <li>Column H — your fourth question prompt</li>
+           </ul>
+           <p class="questions-postcard-note">Edit this list in archive.html to match your Google Form questions.</p>
+       </div>
+   </div>
 
 
 <!-- ****************************************************************************
@@ -40,80 +67,184 @@ Below is javascript for connecting your google sheet to autopopulate the HTML-->
 const SPREADSHEET_ID = "1oMMwpsWJyK6dAZJeTZt9ctn8hmfiPx1OG7S702VKOyQ"; 
 const TAB_NAME = "Sheet1"; //check case
 
-// get the
+// Extract file ID from any Google Drive URL and return an embeddable image URL
 function convertDriveImageUrl(driveUrl) {
-    if (!driveUrl || driveUrl.trim() === '') return '';
+    if (!driveUrl || typeof driveUrl !== 'string') return '';
+    const raw = driveUrl.trim();
+    if (!raw) return '';
     
-    // If it's already a direct image URL, return as is
-    if (driveUrl.includes('drive.google.com/file/d/')) {
-        // Extract file ID from Google Drive URL
-        const fileIdMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-        if (fileIdMatch) {
-            // Convert to direct image URL (thumbnail or full size)
-            return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
-        }
-    }
+    let fileId = null;
+    // Format 1: https://drive.google.com/file/d/FILE_ID/view
+    const fileMatch = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileMatch) fileId = fileMatch[1];
+    // Format 2: https://drive.google.com/open?id=FILE_ID
+    if (!fileId) { const openMatch = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/); if (openMatch) fileId = openMatch[1]; }
+    // Format 3: raw file ID (no URL)
+    if (!fileId && /^[a-zA-Z0-9_-]{20,}$/.test(raw)) fileId = raw;
     
-    // If it's already a direct image URL or other format, return as is
-    return driveUrl;
+    if (!fileId) return raw; // pass through if we can't parse (might be direct image URL)
+    
+    // Thumbnail API often works when export=view is blocked; sz=w1000 = width 1000px
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
 }
 
 const url = `https://opensheet.elk.sh/${SPREADSHEET_ID}/${TAB_NAME}`;
 
+const grid = document.getElementById("postcard-grid");
+if (!grid) throw new Error("postcard-grid not found");
+
 if (!SPREADSHEET_ID) {
-    console.error("Please add your SPREADSHEET_ID in the script section");
-    document.querySelector(".grid").innerHTML = "<p style='text-align:center; padding:20px;'>Please configure your spreadsheet ID in the code.</p>";
+    grid.classList.add("is-empty");
+    grid.innerHTML = "<p style='text-align:center; padding:20px;'>Please configure your spreadsheet ID in the code.</p>";
 } else {
     fetch(url)
         .then(response => {
-            if (!response.ok) {
-                throw new Error("Network response failed");
-            }
+            if (!response.ok) throw new Error("Network response failed");
             return response.json();
         })
         .then(data => {
-            console.log("Loaded data:", data);
-
-            const grid = document.querySelector(".grid");
-            
             if (!data || data.length === 0) {
+                grid.classList.add("is-empty");
                 grid.innerHTML = "<p style='text-align:center; padding:20px;'>No submissions yet. Be the first to add a postcard!</p>";
                 return;
             }
 
-            // Get column headers to access columns by position
-            // Columns: A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7
             const columnKeys = Object.keys(data[0] || {});
-            const columnD = columnKeys[3]; // Column D (4th column, index 3)
-            const columnE = columnKeys[4]; // Column E (5th column, index 4)
-            const columnF = columnKeys[5]; // Column F (6th column, index 5)
-            const columnH = columnKeys[7]; // Column H (8th column, index 7)
+            const columnD = columnKeys[3];
+            const columnE = columnKeys[4];
+            const columnF = columnKeys[5];
+            const columnG = columnKeys[6];
+            const columnH = columnKeys[7];
+
+            // Random positions: use max card size so cards stay on canvas
+            const MAX_CARD_DIM = 500;
+            const CANVAS_WIDTH = 1800;
+            const CANVAS_HEIGHT = 2000;
+            const DEFAULT_CARD_SIZE = 280; // for "no image" postcards
+            let topZ = 1;
+
+            function sizePostcardToImage(section, img) {
+                let w = img.naturalWidth || img.offsetWidth;
+                let h = img.naturalHeight || img.offsetHeight;
+                if (w > MAX_CARD_DIM || h > MAX_CARD_DIM) {
+                    if (w > h) {
+                        h = Math.round(h * MAX_CARD_DIM / w);
+                        w = MAX_CARD_DIM;
+                    } else {
+                        w = Math.round(w * MAX_CARD_DIM / h);
+                        h = MAX_CARD_DIM;
+                    }
+                }
+                section.style.width = w + "px";
+                section.style.height = h + "px";
+            }
 
             data.forEach((entry, index) => {
-                // Get values from columns D, E, F, and H (all text columns)
                 const valueD = entry[columnD] || "";
                 const valueE = entry[columnE] || "";
                 const valueF = entry[columnF] || "";
                 const valueH = entry[columnH] || "";
-                
+                const imageUrlRaw = entry[columnG] || "";
+                const imageSrc = convertDriveImageUrl(imageUrlRaw);
+
                 const section = document.createElement("section");
                 section.className = "postcard-entry";
-                section.innerHTML = `
-                    ${valueD ? `<p class="postcard-text">${valueD}</p>` : ''}
-                    ${valueE ? `<p class="postcard-text">${valueE}</p>` : ''}
-                    ${valueF ? `<p class="postcard-text">${valueF}</p>` : ''}
-                    ${valueH ? `<p class="postcard-text">${valueH}</p>` : ''}
-                `;
+                section.setAttribute("role", "button");
+                section.setAttribute("tabindex", "0");
+                section.setAttribute("aria-label", "Postcard " + (index + 1) + ", click to flip");
+                section.style.left = (Math.random() * Math.max(0, CANVAS_WIDTH - MAX_CARD_DIM)) + "px";
+                section.style.top = (Math.random() * Math.max(0, CANVAS_HEIGHT - MAX_CARD_DIM)) + "px";
+
+                const frontHtml = imageSrc
+                    ? `<div class="postcard-front"><img src="${imageSrc}" alt="Postcard ${index + 1}" class="postcard-image" onerror="this.style.display='none'"></div>`
+                    : `<div class="postcard-front"><span class="postcard-no-image">no image</span></div>`;
+                const backHtml = `<div class="postcard-back">
+                    ${valueD ? `<p class="postcard-text">${valueD}</p>` : ""}
+                    ${valueE ? `<p class="postcard-text">${valueE}</p>` : ""}
+                    ${valueF ? `<p class="postcard-text">${valueF}</p>` : ""}
+                    ${valueH ? `<p class="postcard-text">${valueH}</p>` : ""}
+                </div>`;
+
+                section.innerHTML = frontHtml + backHtml;
+
+                if (!imageSrc) {
+                    section.style.width = DEFAULT_CARD_SIZE + "px";
+                    section.style.height = DEFAULT_CARD_SIZE + "px";
+                } else {
+                    const img = section.querySelector(".postcard-image");
+                    if (img) {
+                        if (img.complete && img.naturalWidth) {
+                            sizePostcardToImage(section, img);
+                        } else {
+                            img.addEventListener("load", function () {
+                                sizePostcardToImage(section, img);
+                            });
+                        }
+                    }
+                }
+
+                section.addEventListener("click", function () {
+                    topZ++;
+                    this.style.zIndex = topZ;
+                    this.classList.toggle("showing-text");
+                });
+                section.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        topZ++;
+                        this.style.zIndex = topZ;
+                        this.classList.toggle("showing-text");
+                    }
+                });
+
                 grid.appendChild(section);
             });
         })
         .catch(error => {
             console.error("Sheet failed to load:", error);
-            document.querySelector(".grid").innerHTML = "<p style='text-align:center; padding:20px;'>Error loading archive. Please check your spreadsheet ID and make sure the sheet is publicly viewable.</p>";
+            grid.classList.add("is-empty");
+            grid.innerHTML = "<p style='text-align:center; padding:20px;'>Error loading archive. Please check your spreadsheet ID and make sure the sheet is publicly viewable.</p>";
         });
 }
 </script>
 
+<script>
+(function () {
+    var dingbat = document.getElementById("questions-dingbat");
+    var overlay = document.getElementById("questions-overlay");
+    var postcard = document.getElementById("questions-postcard");
+    var closeBtn = overlay && overlay.querySelector(".questions-postcard-close");
+
+    function openQuestions() {
+        if (!overlay) return;
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+    }
+    function closeQuestions() {
+        if (!overlay) return;
+        overlay.classList.remove("is-open");
+        overlay.setAttribute("aria-hidden", "true");
+    }
+
+    if (dingbat) dingbat.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (overlay && overlay.classList.contains("is-open")) closeQuestions();
+        else openQuestions();
+    });
+    if (closeBtn) closeBtn.addEventListener("click", closeQuestions);
+    if (overlay) overlay.addEventListener("click", function (e) {
+        if (e.target === overlay) closeQuestions();
+    });
+    if (postcard) postcard.addEventListener("click", function (e) { e.stopPropagation(); });
+})();
+</script>
+
+</div>
+
+<footer>
+    <b> </b>
+    <p> ➸ thanks for visiting! see you around ➸ </p>
+</footer>
 
 <!--This code was provided in Avrie Allen's Wintersession course at RISD, Activating Networks, Gathering Knowledge and was initially inspired by Chia Amisola's sheet sites tutorial with Developh-->
 </body>
