@@ -40,21 +40,17 @@
    </div>
 
    <button type="button" class="archive-dingbat" id="questions-dingbat" aria-label="Show submission questions">
-       ✦
+    ✷
    </button>
 
    <div class="questions-postcard-overlay" id="questions-overlay" aria-hidden="true">
        <div class="questions-postcard" id="questions-postcard">
-           <button type="button" class="questions-postcard-close" aria-label="Close">×</button>
-           <h3 class="questions-postcard-title">Questions on each postcard</h3>
            <ul class="questions-postcard-list">
-               <li>Column D — your first question prompt</li>
-               <li>Column E — your second question prompt</li>
-               <li>Column F — your third question prompt</li>
-               <li>Column G — image (upload)</li>
-               <li>Column H — your fourth question prompt</li>
+               <li>How many photos do you have on your phone?</li>
+               <li>If you could only take 5 photos, what/who would you take pictures of?</li>
+               <li>What do you hope taking pictures achieves?</li>
+               <li>Why did you choose this picture?</li>
            </ul>
-           <p class="questions-postcard-note">Edit this list in archive.html to match your Google Form questions.</p>
        </div>
    </div>
 
@@ -212,30 +208,18 @@ if (!SPREADSHEET_ID) {
 (function () {
     var dingbat = document.getElementById("questions-dingbat");
     var overlay = document.getElementById("questions-overlay");
-    var postcard = document.getElementById("questions-postcard");
-    var closeBtn = overlay && overlay.querySelector(".questions-postcard-close");
+    if (!dingbat || !overlay) return;
 
-    function openQuestions() {
-        if (!overlay) return;
-        overlay.classList.add("is-open");
-        overlay.setAttribute("aria-hidden", "false");
-    }
-    function closeQuestions() {
-        if (!overlay) return;
-        overlay.classList.remove("is-open");
-        overlay.setAttribute("aria-hidden", "true");
+    function toggleQuestions() {
+        var isOpen = overlay.classList.contains("is-open");
+        overlay.classList.toggle("is-open", !isOpen);
+        overlay.setAttribute("aria-hidden", isOpen ? "true" : "false");
     }
 
-    if (dingbat) dingbat.addEventListener("click", function (e) {
+    dingbat.addEventListener("click", function (e) {
         e.stopPropagation();
-        if (overlay && overlay.classList.contains("is-open")) closeQuestions();
-        else openQuestions();
+        toggleQuestions();
     });
-    if (closeBtn) closeBtn.addEventListener("click", closeQuestions);
-    if (overlay) overlay.addEventListener("click", function (e) {
-        if (e.target === overlay) closeQuestions();
-    });
-    if (postcard) postcard.addEventListener("click", function (e) { e.stopPropagation(); });
 })();
 </script>
 
